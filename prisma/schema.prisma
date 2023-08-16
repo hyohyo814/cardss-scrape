@@ -21,6 +21,9 @@ model Series {
     title     String    @unique
     url       String    @unique
     products  Product[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
 }
 
 model Product {

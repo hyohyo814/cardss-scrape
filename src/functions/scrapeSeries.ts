@@ -33,3 +33,4 @@ export async function scrapeSeries(): Promise<Array<SeriesBase>> {
 
   return seriesList;
 }
+

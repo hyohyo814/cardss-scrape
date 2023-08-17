@@ -13,7 +13,7 @@ declare namespace Prisma {
     products: Product[];
   };
 
-  export type SeriesBase = Omit<Series, 'id' | 'products'>
+  export type SeriesBase = Omit<Series, "id" | "products">;
 
   export type Product = {
     id: string;
@@ -28,7 +28,10 @@ declare namespace Prisma {
     updatedAt: Date;
   };
 
-  export type ProductBase = Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'series' | 'seriesId'>
+  export type ProductBase = Omit<
+    Product,
+    "id" | "createdAt" | "updatedAt" | "series"
+  >;
 }
 
 export default Prisma;

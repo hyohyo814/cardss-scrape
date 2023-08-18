@@ -1,14 +1,11 @@
 import {PrismaClient} from "@prisma/client";
 import {scrapeSeries} from "./functions/scrapeSeries";
 import {scrapeProducts} from "./functions/scrapeProducts";
-import { ProductBase } from "./types/prismaTypes";
-import { batchUpsert } from "./functions/batchProcess";
 
 const prisma = new PrismaClient();
 
 async function main() {
   try {
-    /*
     console.time("SCRAPE_SERIES");
     const seriesList = await scrapeSeries();
 
@@ -30,14 +27,11 @@ async function main() {
     }
     console.timeEnd("SCRAPE_SERIES");
     console.log("Completed series scraping");
-*/
     console.time("SCRAPE_PRODUCTS");
+
     const seriesArr = await prisma.series.findMany();
     const products = await scrapeProducts(seriesArr);
-    // const products = await scrapeProductsAlt(seriesArr);
-    await batchUpsert(products);
 
-    /*
     for (const product of products) {
       console.time("INSERT_PRODUCT");
       await prisma.product.upsert({
@@ -55,7 +49,7 @@ async function main() {
         },
       });
       console.timeEnd("INSERT_PRODUCT");
-    }*/
+    }
     console.log(products.length);
     console.timeEnd("SCRAPE_PRODUCTS");
   } catch (err) {

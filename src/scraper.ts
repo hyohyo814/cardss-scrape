@@ -32,7 +32,6 @@ async function main() {
     const seriesArr = await prisma.series.findMany();
     const products = await scrapeProducts(seriesArr);
     console.log(products);
-    /*
     for (const product of products) {
       console.time("INSERT_PRODUCT");
       await prisma.product.upsert({

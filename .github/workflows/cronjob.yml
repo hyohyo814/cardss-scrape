@@ -3,7 +3,7 @@ name: Weekly Scrape
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 2 * * 2"
+    - cron: "30 2 * * 3"
 
 jobs:
   run-scraper:

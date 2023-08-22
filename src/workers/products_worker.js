@@ -15,6 +15,7 @@ async function scrapeSeries(series) {
       obj.name = $(el).find("h2.woocommerce-loop-product__title").text() || "no-title";
       obj.price = $(el).find("span.price").text() || "no-price";
       obj.image = $(el).find("img.wp-post-image").attr("src") || "no-image";
+      obj.productLink = $(el).find("a.woocommerce-LoopProduct-link").attr("href") || "no-link"
       obj.seriesId = series.id;
       products.push(obj);
     });
@@ -26,10 +27,12 @@ async function scrapeSeries(series) {
   return products;
 }
 
-if (parentPort) {
-  const series = workerData.series;
+const series = workerData.series;
 
-  scrapeSeries(series).then(workerProducts => {
+console.time('src/workers/products_worker.js: WORKER POST');
+scrapeSeries(series)
+  .then(workerProducts => {
     parentPort.postMessage(workerProducts);
-  });
-}
+  })
+  .catch(e => console.error(e));
+console.timeEnd('src/workers/products_worker.js: WORKER POST');

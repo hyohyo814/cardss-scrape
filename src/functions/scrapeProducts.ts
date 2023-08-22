@@ -3,13 +3,12 @@ import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
 import { ProductBase, SeriesBase } from "src/types/prismaTypes";
 
 const prisma = new PrismaClient();
-const numThreads = 4;
+const numThreads = 2;
 
-async function startWorkers(seriesArr: SeriesBase[]): Promise<ProductBase[]> {
+async function startWorkers(seriesArr: SeriesBase[]) {
   const workerPromises: Promise<ProductBase[]>[] = [];
   
   for (const series of seriesArr) {
-    console.time("scrapeProducts");
     const workerPromise = new Promise<ProductBase[]>((resolve, reject) => {
       const worker = new Worker("./src/workers/products_worker.js", {
         workerData: {
@@ -18,6 +17,7 @@ async function startWorkers(seriesArr: SeriesBase[]): Promise<ProductBase[]> {
       });
 
       worker.on("message", (workerProducts: ProductBase[]) => {
+        console.log("src/functions/scrapeProducts.ts: worker resolved")
         resolve(workerProducts);
       });
 
@@ -26,21 +26,15 @@ async function startWorkers(seriesArr: SeriesBase[]): Promise<ProductBase[]> {
         reject(error);
       });
 
-      worker.on("exit", () => {
-        prisma.$disconnect();
-      });
     });
-    
-    console.timeEnd("scrapeProducts");
     workerPromises.push(workerPromise);
   };
-  return Promise.all(workerPromises).then(res => res.flat())
+  const result = await Promise.all(workerPromises)
+  return result.flat();
 };
 
 function seriesBatch(series: SeriesBase[]): SeriesBase[][] {
-  console.log('============================================');
-  console.time("BULK_PARTITION");
-  const batchSize = series.length / numThreads;
+  const batchSize = Math.ceil(series.length / numThreads);
   const totalSeries = series.length;
   const batchedSeries: SeriesBase[][] = [];
   
@@ -48,24 +42,24 @@ function seriesBatch(series: SeriesBase[]): SeriesBase[][] {
     const batch = series.slice(i, i + batchSize);
     batchedSeries.push(batch);
   }
-
-  console.timeEnd('BULK_PARTITION');
-  console.log('============================================');
   return batchedSeries;
 };
 
 export async function scrapeProducts(seriesArr: SeriesBase[]): Promise<ProductBase[]> {
-  const products: ProductBase[] = [];
+  let products: ProductBase[] = [];
   const workerPromises: Promise<ProductBase[]>[] = [];
   const seriesBatches = seriesBatch(seriesArr);
 
   try {
     if (isMainThread) {
       for (let i = 0; i < seriesBatches.length; i++) {
-        workerPromises.push(startWorkers(seriesBatches[i]));
+        const worker = startWorkers(seriesBatches[i])
+        workerPromises.push(worker);
       }
+      console.time('src/functions/scrapeProducts.ts: AWAIT WORKER PROMISES');
       const response = await Promise.all(workerPromises);
-      products.push(...response.flat());
+      console.timeEnd('src/functions/scrapeProducts.ts: AWAIT WORKER PROMISES')
+      products = response.flat()
       prisma.$disconnect();
     }
   } catch (err) {

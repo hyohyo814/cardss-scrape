@@ -19,8 +19,8 @@ model User {
 
 model Series {
   id        String    @id @default(cuid())
-  title     String    @unique
-  url       String    @unique
+  title     String    @unique @db.VarChar(255)
+  url       String    @unique @db.VarChar(255)
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -31,9 +31,9 @@ model Product {
   series      Series   @relation(fields: [seriesId], references: [id])
   seriesId    String
   name        String   @unique
-  price       String
-  image       String
-  productLink String?
+  price       String   @db.VarChar(255)
+  image       String   @db.VarChar(255)
+  productLink String?  @db.VarChar(255)
   savedBy     User[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

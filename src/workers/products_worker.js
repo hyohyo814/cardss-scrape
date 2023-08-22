@@ -5,8 +5,20 @@ const cheerio = require("cheerio");
 async function scrapeSeries(series) {
   const products = [];
 
+  const proxy_list = [
+    {
+      protocol: 'http',
+      host: '',
+      port: 8080,
+    }, 
+  ]
+
+  let shuffle = Math.floor(Math.random() * proxy_list.length);
+
   try {
-    const { data } = await axios.get(series.url);
+    const { data } = await axios.get(series.url, {
+      proxy: proxy_list(shuffle),
+    });
     const $ = cheerio.load(data, null, false);
     const shopList = $("div.shop-with-sidebar li");
 

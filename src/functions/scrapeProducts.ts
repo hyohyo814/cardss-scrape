@@ -2,7 +2,7 @@ import { PrismaClient, type Product, type Series } from "@prisma/client";
 import { Worker, isMainThread } from "worker_threads";
 
 const prisma = new PrismaClient();
-const numThreads = 2;
+const numThreads = 1;
 
 async function startWorkers(seriesArr: Series[]) {
   const workerPromises: Promise<Product[]>[] = [];

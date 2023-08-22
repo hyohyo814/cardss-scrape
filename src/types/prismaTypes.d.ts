@@ -21,8 +21,8 @@ export type Product = {
   name: string;
   price: string;
   image: string;
-  savedBy?: User;
-  savedById?: string;
+  productLink: string;
+  savedBy?: User[];
   createdAt: Date;
   updatedAt: Date;
 };

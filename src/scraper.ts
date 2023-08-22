@@ -1,6 +1,7 @@
 import {PrismaClient} from "@prisma/client";
 import {scrapeSeries} from "./functions/scrapeSeries";
 import {scrapeProducts} from "./functions/scrapeProducts";
+import { type Product } from "@prisma/client";
 
 const prisma = new PrismaClient();
 

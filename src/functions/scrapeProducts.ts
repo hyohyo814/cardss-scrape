@@ -1,22 +1,21 @@
-import { PrismaClient, Product } from "@prisma/client";
-import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
-import { ProductBase, SeriesBase } from "src/types/prismaTypes";
+import { PrismaClient, type Product, type Series } from "@prisma/client";
+import { Worker, isMainThread } from "worker_threads";
 
 const prisma = new PrismaClient();
 const numThreads = 2;
 
-async function startWorkers(seriesArr: SeriesBase[]) {
-  const workerPromises: Promise<ProductBase[]>[] = [];
+async function startWorkers(seriesArr: Series[]) {
+  const workerPromises: Promise<Product[]>[] = [];
   
   for (const series of seriesArr) {
-    const workerPromise = new Promise<ProductBase[]>((resolve, reject) => {
+    const workerPromise = new Promise<Product[]>((resolve, reject) => {
       const worker = new Worker("./src/workers/products_worker.js", {
         workerData: {
           series: series,
         },
       });
 
-      worker.on("message", (workerProducts: ProductBase[]) => {
+      worker.on("message", (workerProducts: Product[]) => {
         console.log("src/functions/scrapeProducts.ts: worker resolved")
         resolve(workerProducts);
       });
@@ -33,10 +32,10 @@ async function startWorkers(seriesArr: SeriesBase[]) {
   return result.flat();
 };
 
-function seriesBatch(series: SeriesBase[]): SeriesBase[][] {
+function seriesBatch(series: Series[]): Series[][] {
   const batchSize = Math.ceil(series.length / numThreads);
   const totalSeries = series.length;
-  const batchedSeries: SeriesBase[][] = [];
+  const batchedSeries: Series[][] = [];
   
   for (let i = 0; i < totalSeries; i += batchSize) {
     const batch = series.slice(i, i + batchSize);
@@ -45,9 +44,9 @@ function seriesBatch(series: SeriesBase[]): SeriesBase[][] {
   return batchedSeries;
 };
 
-export async function scrapeProducts(seriesArr: SeriesBase[]): Promise<ProductBase[]> {
-  let products: ProductBase[] = [];
-  const workerPromises: Promise<ProductBase[]>[] = [];
+export async function scrapeProducts(seriesArr: Series[]): Promise<Product[]> {
+  let products: Product[] = [];
+  const workerPromises: Promise<Product[]>[] = [];
   const seriesBatches = seriesBatch(seriesArr);
 
   try {

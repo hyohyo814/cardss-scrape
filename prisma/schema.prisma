@@ -13,6 +13,7 @@ datasource db {
 
 model User {
   id        String    @id @default(cuid())
+  userId    String    @unique
   watchList Product[]
 }
 
@@ -33,11 +34,9 @@ model Product {
   price       String
   image       String
   productLink String?
-  savedBy     User?    @relation(fields: [savedById], references: [id])
-  savedById   String?
+  savedBy     User[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([seriesId])
-  @@index([savedById])
 }
